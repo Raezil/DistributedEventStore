@@ -257,41 +257,6 @@ func (app *Application) subscribeHandler(ctx *fasthttp.RequestCtx) {
 	ctx.SetBodyString(fmt.Sprintf("Event %s subscribed", req.Projection))
 }
 
-// networkMonitor monitors peer connections
-func (app *Application) networkMonitor() {
-	defer app.wg.Done()
-	ticker := time.NewTicker(15 * time.Second)
-	defer ticker.Stop()
-
-	known := map[string]struct{}{}
-
-	for {
-		select {
-		case <-app.ctx.Done():
-			return
-		case <-ticker.C:
-			peers := app.eventBus.GetPeers()
-			for id, info := range peers {
-				if _, seen := known[id.ShortString()]; !seen {
-					// New peer! resend all subscriptions
-					for _, evt := range app.subscribedEvents {
-						if err := app.eventBus.Subscribe(app.ctx, evt); err != nil {
-							log.Printf("⚠️  Resubscribe %s to peer %s failed: %v",
-								evt.Projection, id.ShortString(), err)
-						}
-					}
-					known[id.ShortString()] = struct{}{}
-				}
-				log.Printf("🔗 Peer %s last seen %v ago",
-					id.ShortString(), time.Since(info.LastSeen).Truncate(time.Second))
-			}
-			if len(peers) == 0 {
-				log.Println("🔍 No peers — waiting for discovery…")
-			}
-		}
-	}
-}
-
 // Middleware and hooks
 func (app *Application) loggingMiddleware(next GoEventBus.HandlerFunc) GoEventBus.HandlerFunc {
 	return func(ctx context.Context, args map[string]any) (GoEventBus.Result, error) {
