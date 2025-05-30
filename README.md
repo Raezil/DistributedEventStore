@@ -23,7 +23,7 @@ go get github.com/Raezil/DistributedEventStore
 A complete example is provided in `examples/main.go`. To run it:
 
 ```bash
-go run examples/main.go
+go run examples/server/main.go
 ```
 
 ### `examples/main.go`
