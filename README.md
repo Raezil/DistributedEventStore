@@ -26,7 +26,7 @@ A complete example is provided in `examples/main.go`. To run it:
 go run examples/server/main.go
 ```
 
-### `examples/main.go`
+### `examples/server/main.go`
 
 ```go
 package main
