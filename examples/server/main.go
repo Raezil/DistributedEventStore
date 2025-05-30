@@ -36,15 +36,6 @@ type AppConfig struct {
 	NodeName         string
 }
 
-// UserEvent represents a user-related event
-type UserEvent struct {
-	Username string    `json:"username"`
-	Email    string    `json:"email"`
-	UserID   int       `json:"user_id"`
-	Action   string    `json:"action"`
-	Time     time.Time `json:"time"`
-}
-
 func main() {
 	// Initialize configuration
 	config := &AppConfig{
