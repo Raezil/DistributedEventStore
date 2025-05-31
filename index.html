@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DistributedEventStore - Peer-to-Peer Event Distribution</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0F0F23 0%, #1A1A2E 50%, #16213E 100%);
+            color: #E2E8F0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .node {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #64FFDA;
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* Header */
+        header {
+            padding: 2rem 0;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(100, 255, 218, 0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #64FFDA, #00D4AA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #CBD5E1;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #64FFDA;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #64FFDA;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 4rem 0 6rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #FFFFFF, #64FFDA, #00D4AA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #94A3B8;
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #64FFDA, #00D4AA);
+            color: #0F0F23;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #64FFDA;
+            border: 2px solid #64FFDA;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(100, 255, 218, 0.3);
+        }
+
+        /* Features Grid */
+        .features {
+            padding: 4rem 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 255, 218, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(100, 255, 218, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .feature-card:hover::before {
+            left: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(100, 255, 218, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #64FFDA;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .feature-card p {
+            color: #94A3B8;
+            line-height: 1.6;
+        }
+
+        /* Code Section */
+        .code-section {
+            padding: 4rem 0;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .code-container {
+            background: #1E293B;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(100, 255, 218, 0.2);
+        }
+
+        .code-header {
+            background: #0F172A;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-title {
+            color: #64FFDA;
+            font-weight: 600;
+        }
+
+        .copy-btn {
+            background: #64FFDA;
+            color: #0F0F23;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #00D4AA;
+            transform: scale(1.05);
+        }
+
+        .code-content {
+            padding: 2rem;
+            overflow-x: auto;
+        }
+
+        pre {
+            background: none;
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #E2E8F0;
+        }
+
+        .keyword { color: #FF79C6; }
+        .string { color: #F1FA8C; }
+        .comment { color: #6272A4; }
+        .function { color: #50FA7B; }
+        .type { color: #8BE9FD; }
+
+        /* Configuration Table */
+        .config-section {
+            padding: 4rem 0;
+        }
+
+        .config-table {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(100, 255, 218, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(100, 255, 218, 0.1);
+        }
+
+        th {
+            background: rgba(100, 255, 218, 0.1);
+            color: #64FFDA;
+            font-weight: 600;
+        }
+
+        td {
+            color: #CBD5E1;
+        }
+
+        tr:hover {
+            background: rgba(100, 255, 218, 0.05);
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 0;
+            text-align: center;
+            border-top: 1px solid rgba(100, 255, 218, 0.1);
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            color: #94A3B8;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: #64FFDA;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* Scroll animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation" id="bgAnimation"></div>
+
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <div class="logo">DistributedEventStore</div>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#installation">Installation</a></li>
+                <li><a href="#usage">Usage</a></li>
+                <li><a href="#config">Config</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content fade-in">
+                <h1>Distributed Event Store</h1>
+                <p>A peer-to-peer distributed event store for Go, built on top of GoEventBus and libp2p. Enable event distribution across decentralized networks without a central broker.</p>
+                <div class="cta-buttons">
+                    <a href="#installation" class="btn btn-primary">Get Started</a>
+                    <a href="https://github.com/Raezil/DistributedEventStore" class="btn btn-secondary">View on GitHub</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title fade-in">Powerful Features</h2>
+            <div class="features-grid">
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">🔍</div>
+                    <h3>mDNS Peer Discovery</h3>
+                    <p>Automatically discovers peers on the local network without manual configuration.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">🎛️</div>
+                    <h3>Configurable Filters & Routing</h3>
+                    <p>Apply custom filters and routing rules for intelligent event distribution.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Backpressure Handling</h3>
+                    <p>Integrates GoEventBus overrun policies like DropOldest and Block for reliability.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">🌐</div>
+                    <h3>Relay & Bootstrap</h3>
+                    <p>Enable relay hop support or connect to known bootstrap peers for enhanced connectivity.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">📊</div>
+                    <h3>Statistics</h3>
+                    <p>Track sent/received events and current peer connections with built-in metrics.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">🔗</div>
+                    <h3>P2P Architecture</h3>
+                    <p>Truly decentralized with no single point of failure or central coordination.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation Section -->
+    <section class="code-section" id="installation">
+        <div class="container">
+            <h2 class="section-title fade-in">Installation</h2>
+            <div class="code-container fade-in">
+                <div class="code-header">
+                    <div class="code-title">Install DistributedEventStore</div>
+                    <button class="copy-btn" onclick="copyToClipboard('install-code')">Copy</button>
+                </div>
+                <div class="code-content">
+                    <pre id="install-code"><span class="comment"># Add to your module</span>
+<span class="keyword">go get</span> <span class="string">github.com/Raezil/DistributedEventStore</span></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Usage Section -->
+    <section class="code-section" id="usage">
+        <div class="container">
+            <h2 class="section-title fade-in">Quick Start</h2>
+            <div class="code-container fade-in">
+                <div class="code-header">
+                    <div class="code-title">examples/server/main.go</div>
+                    <button class="copy-btn" onclick="copyToClipboard('usage-code')">Copy</button>
+                </div>
+                <div class="code-content">
+                    <pre id="usage-code"><span class="keyword">package</span> <span class="type">main</span>
+
+<span class="keyword">import</span> (
+    <span class="string">"context"</span>
+    <span class="string">"fmt"</span>
+    <span class="string">"log"</span>
+    <span class="string">"time"</span>
+    
+    <span class="string">"github.com/Raezil/DistributedEventStore"</span>
+    <span class="string">"github.com/Raezil/GoEventBus"</span>
+)
+
+<span class="keyword">func</span> <span class="function">main</span>() {
+    <span class="comment">// Initialize configuration</span>
+    config := &<span class="type">DistributedEventStore.AppConfig</span>{
+        PublishInterval:  <span class="keyword">5</span> * time.Second,
+        MaxUsers:         <span class="keyword">100</span>,
+        EnableStatistics: <span class="keyword">true</span>,
+        NodeName:         fmt.Sprintf(<span class="string">"node-%d"</span>, os.Getpid()),
+    }
+
+    <span class="comment">// Create application instance</span>
+    dispatcher := <span class="function">createEventDispatcher</span>()
+    app, err := <span class="type">DistributedEventStore</span>.<span class="function">NewApplication</span>(dispatcher, config)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        log.<span class="function">Fatalf</span>(<span class="string">"Failed to create application: %v"</span>, err)
+    }
+
+    <span class="comment">// Start the application</span>
+    <span class="keyword">if</span> err := app.<span class="function">Start</span>(); err != <span class="keyword">nil</span> {
+        log.<span class="function">Fatalf</span>(<span class="string">"Failed to start application: %v"</span>, err)
+    }
+
+    <span class="comment">// Wait for shutdown signal</span>
+    app.<span class="function">WaitForShutdown</span>()
+}</pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Configuration Section -->
+    <section class="config-section" id="config">
+        <div class="container">
+            <h2 class="section-title fade-in">Configuration Options</h2>
+            <div class="config-table fade-in">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Option</th>
+                            <th>Type</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ListenAddrs</td>
+                            <td>[]string</td>
+                            <td>[/ip4/0.0.0.0/tcp/0]</td>
+                            <td>Multiaddrs to listen on</td>
+                        </tr>
+                        <tr>
+                            <td>SyncInterval</td>
+                            <td>time.Duration</td>
+                            <td>5s</td>
+                            <td>Interval between syncs</td>
+                        </tr>
+                        <tr>
+                            <td>MaxPeers</td>
+                            <td>int</td>
+                            <td>50</td>
+                            <td>Maximum number of peers to maintain</td>
+                        </tr>
+                        <tr>
+                            <td>EventFilters</td>
+                            <td>[]EventFilter</td>
+                            <td>[]</td>
+                            <td>Filters to apply before broadcasting</td>
+                        </tr>
+                        <tr>
+                            <td>RoutingRules</td>
+                            <td>[]RoutingRule</td>
+                            <td>[BroadcastToAll]</td>
+                            <td>Rules to select target peers</td>
+                        </tr>
+                        <tr>
+                            <td>EnableRelay</td>
+                            <td>bool</td>
+                            <td>false</td>
+                            <td>Enable libp2p relay</td>
+                        </tr>
+                        <tr>
+                            <td>BootstrapPeers</td>
+                            <td>[]string</td>
+                            <td>[]</td>
+                            <td>Addresses of peers to bootstrap connect to</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="logo">DistributedEventStore</div>
+                <div class="footer-links">
+                    <a href="https://github.com/Raezil/DistributedEventStore">GitHub</a>
+                    <a href="https://github.com/Raezil/GoEventBus">GoEventBus</a>
+                    <a href="https://github.com/libp2p/go-libp2p">libp2p</a>
+                </div>
+                <div>MIT © 2025</div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Animated background nodes
+        function createNodes() {
+            const bgAnimation = document.getElementById('bgAnimation');
+            const nodeCount = 50;
+            
+            for (let i = 0; i < nodeCount; i++) {
+                const node = document.createElement('div');
+                node.className = 'node';
+                node.style.left = Math.random() * 100 + '%';
+                node.style.top = Math.random() * 100 + '%';
+                node.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                node.style.animationDelay = Math.random() * 2 + 's';
+                bgAnimation.appendChild(node);
+            }
+        }
+
+        // Scroll animations
+        function handleScrollAnimations() {
+            const elements = document.querySelectorAll('.fade-in');
+            
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.classList.add('visible');
+                }
+            });
+        }
+
+        // Copy to clipboard function
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.style.background = '#00D4AA';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#64FFDA';
+                }, 2000);
+            });
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Initialize
+        window.addEventListener('load', () => {
+            createNodes();
+            handleScrollAnimations();
+        });
+
+        window.addEventListener('scroll', handleScrollAnimations);
+
+        // Parallax effect for hero section
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero');
+            if (hero) {
+                hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+            }
+        });
+    </script>
+</body>
+</html>
