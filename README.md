@@ -135,20 +135,6 @@ func handleUserDeleted(ctx context.Context, args map[string]interface{}) (GoEven
 		Message: fmt.Sprintf("User %s (ID: %d) deleted successfully", username, userID),
 	}, nil
 }
-
-func handleSystemStats(ctx context.Context, args map[string]interface{}) (GoEventBus.Result, error) {
-	if remote, ok := args["_remote"].(bool); ok && remote {
-		sourceNode, _ := args["_source_node"].(string)
-		peerCount, _ := args["peer_count"].(int)
-		eventsSent, _ := args["events_sent"].(uint64)
-		eventsReceived, _ := args["events_received"].(uint64)
-
-		log.Printf("📊 Remote stats - Node: %s, Peers: %d, Sent: %d, Received: %d",
-			sourceNode, peerCount, eventsSent, eventsReceived)
-	}
-
-	return GoEventBus.Result{Message: "System stats processed"}, nil
-}
 ```
 
 ## Configuration Options
