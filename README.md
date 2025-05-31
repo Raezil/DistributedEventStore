@@ -165,4 +165,4 @@ func handleSystemStats(ctx context.Context, args map[string]interface{}) (GoEven
 
 ## License
 
-MIT © Your Name
+MIT © Raezil
